@@ -84,8 +84,8 @@ async function startNode() {
     peerDiscovery: [
       bootstrap({
         list: [
-          '/ip4/35.200.242.137/tcp/9001/ws/p2p/12D3KooWSUP9b3EEHWdaiScniD24eA4hMfiemGxHxLFGGuBt9r6E',
-          '/ip4/35.200.242.137/tcp/9002/p2p/12D3KooWSUP9b3EEHWdaiScniD24eA4hMfiemGxHxLFGGuBt9r6E'
+          '/ip4/35.200.242.137/tcp/9001/ws/p2p/12D3KooWPyFNFu2n9nN7crWrzFpXfhpULWgY42DNJ9szSu4Lo7gx',
+          '/ip4/35.200.242.137/tcp/9002/p2p/12D3KooWPyFNFu2n9nN7crWrzFpXfhpULWgY42DNJ9szSu4Lo7gx'
         ],
       }),
       pubsubPeerDiscovery({

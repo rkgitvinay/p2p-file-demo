@@ -84,12 +84,12 @@ async function startNode() {
     peerDiscovery: [
       bootstrap({
         list: [
-          '/ip4/35.200.242.137/tcp/9001/ws/p2p/12D3KooWM5LTufX8PrBPy1iFR7MDohkdx95Vosd2XaYzjb1Grzwi',
-          '/ip4/35.200.242.137/tcp/9002/p2p/12D3KooWM5LTufX8PrBPy1iFR7MDohkdx95Vosd2XaYzjb1Grzwi'
+          '/ip4/35.200.242.137/tcp/9001/ws/p2p/12D3KooWSUP9b3EEHWdaiScniD24eA4hMfiemGxHxLFGGuBt9r6E',
+          '/ip4/35.200.242.137/tcp/9002/p2p/12D3KooWSUP9b3EEHWdaiScniD24eA4hMfiemGxHxLFGGuBt9r6E'
         ],
       }),
       pubsubPeerDiscovery({
-        interval: 10_000,
+        interval: 1000,
         topics: [PUBSUB_PEER_DISCOVERY],
       }),
     ],
@@ -131,16 +131,6 @@ async function startNode() {
     
     const peerInfo = networkNodes.get(peerId)
     
-    // Implement connection attempt tracking and backoff
-    // if (peerInfo.connectionAttempts > 10) {
-    //   const timeSinceLastAttempt = Date.now() - peerInfo.lastConnectionAttempt
-    //   if (timeSinceLastAttempt < 300000) { // 5 minutes
-    //     console.log(`Skipping connection attempt to ${peerId} due to too many recent failures`)
-    //     return
-    //   }
-    //   peerInfo.connectionAttempts = 0
-    // }
-    
     try {
       const peerData = await node.peerStore.get(evt.detail.id)
       const peerAddrs = peerData?.addresses || []
@@ -164,28 +154,6 @@ async function startNode() {
     const peerId = evt.detail.toString()
     connectedPeers.add(peerId)
     console.log('Connected to peer:', peerId)
-    
-    try {
-      // Get peer's addresses from the peer store
-      const peerInfo = await node.peerStore.get(evt.detail)
-      const addresses = peerInfo?.addresses.map(addr => addr.multiaddr.toString()) || []
-      
-      // Update peer information in network nodes
-      networkNodes.set(peerId, {
-        id: peerId,
-        files: networkNodes.get(peerId)?.files || new Set(),
-        address: addresses,
-        lastSeen: Date.now(),
-        isLocal: false,
-        status: 'connected'
-      })
-      
-      // Announce updated node status
-      await announceNode()
-      
-    } catch (err) {
-      console.error('Error updating peer info:', err)
-    }
   })
 
   // Handle file announcements
@@ -301,21 +269,6 @@ async function startNode() {
     console.log(`HTTP server listening on port ${port}`)
     console.log('Node addresses:', node.getMultiaddrs().map(ma => ma.toString()))
   })
-
-  // Enhanced node announcement function
-  async function announceNode() {
-    const nodeInfo = networkNodes.get(nodeId)
-    const announceData = {
-      type: 'node-announce',
-      nodeId,
-      address: node.getMultiaddrs().map(ma => ma.toString()),
-      files: Array.from(nodeInfo.files || []),
-      timestamp: Date.now(),
-      status: 'active'
-    }
-  
-    await node.services.pubsub.publish('node-discovery', Buffer.from(JSON.stringify(announceData)))
-  }
 
   await node.start()
   console.log('Node started with ID:', nodeId)

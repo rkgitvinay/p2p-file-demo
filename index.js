@@ -94,7 +94,9 @@ async function startNode() {
       }),
     ],
     services: {
-      pubsub: gossipsub(),
+      pubsub: gossipsub({
+        emitSelf: true
+      }),
       identify: identify(),
     },
   })

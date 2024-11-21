@@ -159,53 +159,6 @@ async function startNode() {
     networkNodes.set(peerId, peerInfo)
   })
 
-  // Helper function to dial a peer with retries
-  async function dialWithRetry(peerId, addresses, maxRetries = 5) {
-    let lastError
-    
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        // Try multiple transport strategies
-        for (const addr of addresses) {
-          try {
-            const ma = multiaddr(addr.multiaddr.toString())
-            
-            // Try TCP first
-            if (ma.toString().includes('/tcp/')) {
-              await node.dial(ma)
-              return
-            }
-            
-            // Try WebSocket if TCP fails
-            if (ma.toString().includes('/ws/')) {
-              const wsAddr = ma.encapsulate('/ws')
-              await node.dial(wsAddr)
-              return
-            }
-            
-            // Try WebRTC as last resort
-            if (ma.toString().includes('/webrtc/')) {
-              await node.dial(ma)
-              return
-            }
-          } catch (err) {
-            lastError = err
-            console.warn(`Failed to dial ${ma.toString()}: ${err.message}`)
-            continue
-          }
-        }
-        
-        throw lastError
-      } catch (err) {
-        if (i === maxRetries - 1) throw err
-        
-        // Exponential backoff with jitter
-        const delay = Math.min(1000 * Math.pow(2, i) + Math.random() * 1000, 30000)
-        await new Promise(resolve => setTimeout(resolve, delay))
-      }
-    }
-  }
-
   // Enhanced connection handler
   node.addEventListener('peer:connect', async (evt) => {
     const peerId = evt.detail.toString()
@@ -228,7 +181,7 @@ async function startNode() {
       })
       
       // Announce updated node status
-      // await announceNode()
+      await announceNode()
       
     } catch (err) {
       console.error('Error updating peer info:', err)

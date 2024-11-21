@@ -61,6 +61,8 @@ async function startNode() {
       listen: [ 
         // 👇 Listen for webRTC connection
         '/webrtc',
+        '/ip4/0.0.0.0/tcp/0/ws',
+        '/ip4/0.0.0.0/tcp/0',
       ],
     },
     transports: [
@@ -70,6 +72,7 @@ async function startNode() {
       }),
       webTransport(),
       webRTC(),
+      tcp(),
       // // 👇 Required to create circuit relay reservations in order to hole punch browser-to-browser WebRTC connections
       circuitRelayTransport({
         discoverRelays: 1,
